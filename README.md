@@ -53,7 +53,9 @@ A static production host must set both headers on responses. Opening `index.html
 ## Implementation
 
 - `src/simulation.ts`: deterministic grid state, action validation, and objective tracking.
-- `src/farm-view.ts`: Babylon.js primitive diorama and procedural animations; maps grid coordinates to world coordinates.
+- `src/farm-view.ts`: fixed Babylon.js diorama, animation timing, and grid-to-world mapping.
+- `src/cappy-model.ts`: upright capybara with an authored pear-shaped body, broad continuous muzzle, straw hat, and independent head/limb animation pivots.
+- `src/art.ts` / `src/farm-models.ts`: compact procedural mesh helpers, shared materials, beveled soil plots, carrot foliage, and farm decorations.
 - `public/python-worker.js`: isolated Pyodide runtime with synchronous Python commands.
 - `src/runtime.ts`: worker lifecycle and a single-action shared-memory acknowledgement bridge. Only the worker calls `Atomics.wait`; the UI stays responsive. Worker termination implements Stop without relying on Python cooperating.
 - `src/editor.ts` / `src/main.ts`: CodeMirror editor, execution-line highlight, controls, bounded console, and animation/state coordination. State commits after each completed animation.

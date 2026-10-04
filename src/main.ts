@@ -27,7 +27,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <div class="farm-panel">
         <div class="farm-top"><span><span class="live-dot"></span> THE LITTLE FARM</span><span id="farm-status">Cappy is ready for you</span></div>
         <canvas id="farm" aria-label="A six by six farm with Cappy and six soil tiles" role="img"></canvas>
-        <div class="farm-bottom"><span id="position">Cappy · tile (1, 3)</span><span class="orientation">↖ up <span>↗ right</span> · 6 × 6 grid</span></div>
+        <div class="farm-bottom"><span id="position">Cappy · tile (1, 3)</span><span class="orientation">↗ up <span>↘ right</span> · 6 × 6 grid</span></div>
       </div>
     </section>
     <section class="console-panel" aria-label="Program output">

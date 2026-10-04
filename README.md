@@ -60,4 +60,4 @@ A static production host must set both headers on responses. Opening `index.html
 - `src/runtime.ts`: worker lifecycle and a single-action shared-memory acknowledgement bridge. Only the worker calls `Atomics.wait`; the UI stays responsive. Worker termination implements Stop without relying on Python cooperating.
 - `src/editor.ts` / `src/main.ts`: CodeMirror editor, execution-line highlight, controls, bounded console, and animation/state coordination. State commits after each completed animation.
 
-Simulation tests cover all movement directions and boundaries, invalid commands, planting, reset, and the objective. Renderer details are intentionally kept simple.
+Tests cover movement and boundaries, planting, reset, the objective, worker cancellation/recovery, character proportions, grounded planting poses, and neutral-pose recovery. The [approved Cappy character sheet and model comparison](docs/CAPPY_CHARACTER.md) document the visual reference. Renderer details are intentionally kept simple.

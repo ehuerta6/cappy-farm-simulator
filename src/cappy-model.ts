@@ -4,12 +4,12 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import { Art } from './art';
 
-const fur = '#956b4f';
-const face = '#b08a64';
-const muzzle = '#c1a07a';
-const paw = '#554238';
-const nose = '#332b26';
-const straw = '#d8b975';
+const fur = '#9f704f';
+const face = '#a77754';
+const muzzle = '#c6a781';
+const paw = '#4a3930';
+const nose = '#4b3b33';
+const straw = '#d9b574';
 
 // Model faces local +Z. Root handles tile position/facing; the independent
 // puppet/head/limb pivots handle the reference's chunky bipedal personality.
@@ -31,23 +31,26 @@ export class CappyModel {
 
     // Broad lower abdomen and tapered shoulders: a single continuous pear mesh.
     const body = art.profile('pear-shaped fur', [
-      { y: .16, x: .29, z: .22 }, { y: .23, x: .46, z: .34 },
-      { y: .38, x: .61, z: .43 }, { y: .55, x: .66, z: .46, offsetZ: .025 },
-      { y: .73, x: .62, z: .43, offsetZ: .035 }, { y: .90, x: .50, z: .34 },
-      { y: 1.04, x: .35, z: .25 }, { y: 1.12, x: .25, z: .19 },
-    ], fur, this.torso, 28);
+      { y: .145, x: .20, z: .18 }, { y: .18, x: .305, z: .27 },
+      { y: .25, x: .41, z: .35 }, { y: .36, x: .50, z: .42, offsetZ: .012 },
+      { y: .49, x: .55, z: .465, offsetZ: .025 }, { y: .62, x: .56, z: .47, offsetZ: .032 },
+      { y: .76, x: .515, z: .44, offsetZ: .036 }, { y: .89, x: .438, z: .37, offsetZ: .020 },
+      { y: 1.01, x: .345, z: .29 }, { y: 1.10, x: .272, z: .24 },
+      { y: 1.15, x: .228, z: .20 },
+    ], fur, this.torso, 32);
     // Paint the lighter belly onto the continuous body surface, so it cannot
     // intersect the torso or read as a separate floating plate in side view.
     const positions = body.getVerticesData(VertexBuffer.PositionKind)!;
     const furColor = Color3.FromHexString(fur);
-    const bellyColor = Color3.FromHexString('#b3916e');
+    const bellyColor = Color3.FromHexString('#d1b48d');
     const colors: number[] = [];
     for (let i = 0; i < positions.length; i += 3) {
       const y = positions[i + 1];
       const z = positions[i + 2];
-      const front = Math.max(0, Math.min(1, (z - .07) / .30));
-      const belly = Math.max(0, 1 - Math.abs(y - .60) / .49);
-      const color = Color3.Lerp(furColor, bellyColor, front * Math.min(1, belly * 1.8));
+      const front = Math.max(0, Math.min(1, (z - .01) / .31));
+      const belly = Math.max(0, 1 - Math.abs(y - .65) / .54);
+      const variation = 1 + Math.sin(positions[i] * 19 + y * 13 + z * 23) * .025;
+      const color = Color3.Lerp(furColor, bellyColor, front * Math.min(1, belly * 1.6)).scale(variation);
       colors.push(color.r, color.g, color.b, 1);
     }
     body.material = art.material('#ffffff');
@@ -58,53 +61,61 @@ export class CappyModel {
     this.head.parent = this.torso;
     this.head.position.set(0, 1.19, .085);
     const skull = art.profile('broad capybara skull', [
-      { y: -.245, x: .27, z: .27 }, { y: -.205, x: .38, z: .335 },
-      { y: -.10, x: .45, z: .355 }, { y: .07, x: .45, z: .355 },
-      { y: .185, x: .41, z: .33 }, { y: .245, x: .32, z: .28 },
-    ], face, this.head, 28, .6);
-    skull.position.z = .015;
+      { y: -.245, x: .235, z: .24 }, { y: -.215, x: .32, z: .30 },
+      { y: -.15, x: .395, z: .345 }, { y: -.06, x: .435, z: .372 },
+      { y: .05, x: .438, z: .378 }, { y: .145, x: .410, z: .355 },
+      { y: .215, x: .350, z: .305 }, { y: .255, x: .245, z: .23 },
+    ], face, this.head, 32, .80);
+    skull.position.z = .012;
     // The projecting blunt muzzle, rather than a round snout, defines a capybara.
     const snout = art.profile('continuous broad capybara muzzle', [
-      { y: -.25, x: .23, z: .16 }, { y: -.215, x: .32, z: .20 },
-      { y: -.10, x: .365, z: .24 }, { y: .005, x: .33, z: .22 },
-      { y: .04, x: .255, z: .16 },
-    ], muzzle, this.head, 28, .65);
-    snout.position.z = .40;
+      { y: -.25, x: .19, z: .13 }, { y: -.225, x: .265, z: .18 },
+      { y: -.17, x: .322, z: .22 }, { y: -.09, x: .343, z: .25 },
+      { y: -.015, x: .33, z: .247 }, { y: .045, x: .27, z: .20 },
+      { y: .070, x: .18, z: .13 },
+    ], muzzle, this.head, 32, .83);
+    snout.position.z = .395;
     for (const side of [-1, 1]) {
-      art.sphere('small dark eye', new Vector3(side * .34, .09, .332), new Vector3(.073, .086, .047), '#251f1b', this.head, 6);
-      art.sphere('eye glint', new Vector3(side * .341 - .011, .111, .351), new Vector3(.012, .016, .009), '#e2cfaa', this.head, 3);
-      const ear = art.sphere('rounded ear', new Vector3(side * .35, .27, -.10), new Vector3(.14, .19, .105), fur, this.head, 5);
+      art.sphere('small dark eye', new Vector3(side * .359, .095, .278), new Vector3(.066, .090, .048), '#251f1b', this.head, 6);
+      art.sphere('eye glint', new Vector3(side * .360 - .010, .120, .298), new Vector3(.012, .016, .009), '#e2cfaa', this.head, 3);
+      const ear = art.sphere('rounded ear', new Vector3(side * .35, .25, -.135), new Vector3(.14, .145, .105), paw, this.head, 5);
       ear.rotation.z = side * -.19;
-      art.sphere('inner ear', new Vector3(side * .351, .285, -.045), new Vector3(.076, .10, .03), '#765642', this.head, 5);
-      art.tube('quiet mouth', [new Vector3(0, -.218, .581), new Vector3(side * .12, -.222, .575), new Vector3(side * .25, -.205, .549)], .008, '#71573f', this.head);
+      art.sphere('inner ear', new Vector3(side * .351, .262, -.080), new Vector3(.072, .070, .025), '#765642', this.head, 5);
+      art.tube('quiet mouth', [new Vector3(0, -.205, .598), new Vector3(side * .115, -.209, .588), new Vector3(side * .21, -.199, .564)], .008, '#483326', this.head);
     }
-    art.sphere('broad velvet nose', new Vector3(0, .016, .611), new Vector3(.32, .15, .15), nose, this.head, 10);
-    for (const side of [-1, 1]) art.sphere('nostril', new Vector3(side * .081, .025, .682), new Vector3(.043, .028, .015), '#201b18', this.head, 4);
-    art.tube('muzzle center line', [new Vector3(0, -.052, .659), new Vector3(0, -.14, .624), new Vector3(0, -.218, .581)], .008, '#71573f', this.head);
+    const noseMesh = art.profile('soft angular capybara nose', [
+      { y: -.095, x: .049, z: .030 }, { y: -.070, x: .096, z: .062 },
+      { y: -.014, x: .159, z: .087 }, { y: .049, x: .17, z: .082 },
+      { y: .083, x: .133, z: .056 },
+    ], nose, this.head, 20, .55);
+    noseMesh.position.set(0, .015, .624);
+    for (const side of [-1, 1]) art.sphere('nostril', new Vector3(side * .109, .012, .701), new Vector3(.060, .030, .018), '#201b18', this.head, 4);
+    art.tube('muzzle center line', [new Vector3(0, -.066, .654), new Vector3(0, -.14, .640), new Vector3(0, -.205, .598)], .008, '#483326', this.head);
 
     for (const side of [-1, 1]) {
       const arm = new TransformNode(side < 0 ? 'ArmLeft' : 'ArmRight', art.scene);
       arm.parent = this.torso;
-      arm.position.set(side * .48, .98, .035);
+      arm.position.set(side * .375, 1.01, .005);
       arm.scaling.y = .78;
       art.profile('short arm', [
         { y: -.44, x: .061, z: .068, offsetZ: .055 },
-        { y: -.31, x: .080, z: .080, offsetZ: .026 },
-        { y: -.13, x: .080, z: .082 },
-        { y: -.02, x: .075, z: .070 }, { y: .045, x: .028, z: .032 },
+        { y: -.31, x: .082, z: .083, offsetZ: .035 },
+        { y: -.13, x: .10, z: .091, offsetZ: .012 },
+        { y: -.02, x: .089, z: .077 }, { y: .055, x: .030, z: .035 },
       ], fur, arm, 12);
-      art.sphere('little dark paw', new Vector3(0, -.44, .06), new Vector3(.15, .19, .15), paw, arm, 6);
-      for (let toe = 0; toe < 3; toe++) art.sphere('paw digit', new Vector3((toe - 1) * .038, -.51, .098), new Vector3(.046, .09, .063), paw, arm, 4);
+      art.sphere('little dark paw', new Vector3(0, -.44, .06), new Vector3(.15, .24, .145), paw, arm, 6);
+      for (let toe = 0; toe < 3; toe++) art.sphere('paw digit', new Vector3((toe - 1) * .038, -.53, .093), new Vector3(.046, .092, .066), paw, arm, 4);
       this.arms.push(arm);
 
       const leg = new TransformNode(side < 0 ? 'LegLeft' : 'LegRight', art.scene);
       leg.parent = this.puppet;
-      leg.position.set(side * .27, .235, .0);
+      leg.position.set(side * .245, .235, .0);
       art.cylinder('short sturdy leg', new Vector3(0, -.065, 0), .15, .17, .20, '#765440', leg);
       art.sphere('capybara foot', new Vector3(0, -.15, .07), new Vector3(.23, .14, .28), paw, leg, 6);
-      for (let toe = 0; toe < 4; toe++) art.sphere('rounded toe', new Vector3((toe - 1.5) * .045, -.167, .19), new Vector3(.055, .083, .094), paw, leg, 4);
+      for (let toe = 0; toe < 3; toe++) art.sphere('rounded toe', new Vector3((toe - 1) * .065, -.167, .19), new Vector3(.075, .085, .096), paw, leg, 4);
       this.legs.push(leg);
     }
+    art.sphere('small rounded tail', new Vector3(0, .43, -.44), new Vector3(.18, .16, .16), fur, this.torso, 5);
     this.createHat(art);
     this.rest();
   }
@@ -115,24 +126,24 @@ export class CappyModel {
     hat.rotation.set(-.055, .04, -.075);
     // Curved shallow brim and pinched crown, instead of stacked plain cylinders.
     art.profile('curved straw brim', [
-      { y: -.025, x: .22, z: .20 }, { y: -.035, x: .50, z: .46 },
-      { y: .005, x: .53, z: .49 }, { y: .05, x: .47, z: .435 },
+      { y: -.012, x: .22, z: .20 }, { y: -.024, x: .55, z: .48 },
+      { y: .006, x: .58, z: .51 }, { y: .035, x: .54, z: .48 },
       { y: .04, x: .26, z: .24 },
     ], straw, hat, 24);
     art.profile('hat crown', [
-      { y: .005, x: .275, z: .25 }, { y: .08, x: .285, z: .26 },
-      { y: .23, x: .24, z: .215 }, { y: .28, x: .205, z: .19 },
-      { y: .29, x: .17, z: .16 },
-    ], '#e2c383', hat, 20, .9);
+      { y: .005, x: .285, z: .25 }, { y: .07, x: .295, z: .26 },
+      { y: .16, x: .275, z: .24 }, { y: .225, x: .225, z: .20 },
+      { y: .24, x: .19, z: .17 },
+    ], '#dfba76', hat, 12, .9);
     art.profile('woven hat band', [
-      { y: .045, x: .284, z: .261 }, { y: .094, x: .283, z: .260 },
-    ], '#856242', hat, 20, .9);
+      { y: .038, x: .296, z: .266 }, { y: .083, x: .296, z: .266 },
+    ], '#743f28', hat, 20, .9);
     for (let line = 0; line < 3; line++) {
       const radius = .31 + line * .065;
       const points = Array.from({ length: 25 }, (_, i) => new Vector3(Math.cos(i / 24 * Math.PI * 2) * radius, .04 + line * .006, Math.sin(i / 24 * Math.PI * 2) * radius * .92));
       art.tube('brim straw weave', points, .004, '#c4a363', hat);
     }
-    art.roundedBox('hat band knot', new Vector3(-.27, .071, .075), new Vector3(.065, .065, .10), '#73573c', hat);
+    art.roundedBox('hat band knot', new Vector3(-.288, .062, .065), new Vector3(.065, .065, .10), '#663b28', hat);
   }
   rest() {
     this.puppet.position.setAll(0);
@@ -167,14 +178,13 @@ export class CappyModel {
   plant(t: number) {
     this.rest();
     const bend = Math.sin(t * Math.PI) ** 1.1;
-    this.torso.rotation.x = bend * .40;
-    this.torso.scaling.y = 1 - bend * .08;
+    this.torso.rotation.x = bend * .56;
+    this.torso.scaling.y = 1 - bend * .10;
     this.head.rotation.x = bend * .13;
     this.arms.forEach((arm, i) => {
       arm.rotation.x = -bend * 1.05;
-      arm.rotation.z = (i ? 1 : -1) * (.48 - bend * .18);
+      arm.rotation.z = (i ? 1 : -1) * (.48 - bend * .15);
     });
-
   }
   confused(t: number) {
     this.rest();
